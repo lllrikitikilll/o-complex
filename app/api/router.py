@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from httpx import AsyncClient
 
+from app.api.dependencies import get_async_http_client
 from app.api.schemas import RequestSchema
 from app.api.weatherapi import weather_api
 
