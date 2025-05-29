@@ -1,20 +1,17 @@
-import { CITIES } from '/static/cities.js';
-import { WeatherAPI } from '/static/weather-api.js';
+import { CITIES } from '/static/russian-cities.js';
 
 const cityInput = document.getElementById('city-input');
 const suggestionsContainer = document.getElementById('suggestions-container');
 const weatherDisplay = document.getElementById('weather-display');
 
-const weatherApi = new WeatherAPI();
-
-cityInput.addEventListener('input', handleInput);
+cityInput.addEventListener('input', autocomplete);
 cityInput.addEventListener('focus', () => {
     if (cityInput.value.trim().length > 0) {
-        handleInput(); // Show suggestions if there's text already
+        autocomplete(); // Показать предложения, если есть текст
     }
 });
 
-// Hide suggestions when clicking outside
+// Скрыть предложения при клике вне
 document.addEventListener('click', (event) => {
     if (!cityInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
         suggestionsContainer.innerHTML = '';
@@ -22,49 +19,65 @@ document.addEventListener('click', (event) => {
     }
 });
 
-function handleInput() {
-    const query = cityInput.value.toLowerCase().trim();
-    if (query.length === 0) {
-        suggestionsContainer.innerHTML = '';
+function autocomplete() {
+    const filter = cityInput.value.toLowerCase();
+    suggestionsContainer.innerHTML = '';
+
+    if (filter) {
+        const filteredCities = CITIES.filter(city => city.name.toLowerCase().includes(filter));
+        displaySuggestions(filteredCities);
+    } else {
         suggestionsContainer.style.display = 'none';
-        return;
     }
-
-    const filteredCities = CITIES.filter(city =>
-        city.toLowerCase().startsWith(query)
-    ).slice(0, 10); // Limit suggestions
-
-    displaySuggestions(filteredCities);
 }
 
-function displaySuggestions(suggestions) {
+function displaySuggestions(cities) {
     suggestionsContainer.innerHTML = '';
-    if (suggestions.length === 0) {
+    if (cities.length === 0) {
         suggestionsContainer.style.display = 'none';
         return;
     }
 
-    suggestions.forEach(city => {
+    cities.forEach(city => {
         const suggestionItem = document.createElement('div');
         suggestionItem.classList.add('suggestion-item');
-        suggestionItem.textContent = city;
-        suggestionItem.addEventListener('click', () => selectCity(city));
+        suggestionItem.textContent = city.name;
+        suggestionItem.addEventListener('click', () => selectCity(
+            city.name,
+            city.coords.lat,
+            city.coords.lon,
+        )
+    );
+
         suggestionsContainer.appendChild(suggestionItem);
     });
     suggestionsContainer.style.display = 'block';
 }
 
-async function selectCity(cityName) {
+async function selectCity(cityName, lat, lon) {
     cityInput.value = cityName;
     suggestionsContainer.innerHTML = '';
     suggestionsContainer.style.display = 'none';
-    cityInput.blur(); // Remove focus from input
+    cityInput.blur(); // Убираем фокус с поля ввода
 
     weatherDisplay.innerHTML = '<p>Загрузка данных о погоде...</p>';
 
     try {
-        const weatherData = await fetch('/weather/'+cityName, {method: "post"})
-        const data = await weatherData.json();
+        let coords = {"lat": lat, "lon": lon}
+        const response = await fetch(
+            `/weather` , { 
+                method: "POST",
+                headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                body: JSON.stringify(coords) 
+            }
+        );
+        if (!response.ok) {
+            throw new Error('Сетевая ошибка');
+        }
+        const data = await response.json();
+        data.city = cityName
         displayWeather(data);
     } catch (error) {
         console.error("Ошибка получения погоды:", error);
@@ -78,33 +91,9 @@ function displayWeather(data) {
         return;
     }
 
-    let iconUrl = 'default_weather_icon.png';
-    switch (data.description.toLowerCase()) {
-        case 'ясно':
-            iconUrl = '/static/sunny_icon.png';
-            break;
-        case 'облачно':
-            iconUrl = '/static/cloudy_icon.png';
-            break;
-        case 'дождь':
-            iconUrl = '/static/rainy_icon.png';
-            break;
-        case 'сильный дождь':
-            iconUrl = '/static/rainy_icon.png';
-            break;
-        case 'снег':
-            iconUrl = '/static/snowy_icon.png';
-            break;
-    }
-
-
     weatherDisplay.innerHTML = `
         <h2>Погода в ${data.city}</h2>
-        <img src="${iconUrl}" alt="${data.description}" class="weather-icon">
         <p>Температура: ${data.temperature}°C</p>
-        <p>Описание: ${data.description}</p>
-        <p>Влажность: ${data.humidity}%</p>
         <p>Ветер: ${data.windSpeed} м/с</p>
     `;
 }
-
