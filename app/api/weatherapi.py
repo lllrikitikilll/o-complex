@@ -1,5 +1,3 @@
-import asyncio
-
 import httpx
 
 from app.api.schemas import BaseWeatherSchema
@@ -12,7 +10,7 @@ class WeatherAPIAsync:
     """Асинхронный апи погоды
     """
     def __init__(self, api_url: str):
-        api_url = api_url
+        self.api_url = api_url
 
     async def get_basic_weather(
         self, client: httpx.AsyncClient, lat: str, lon: str
@@ -22,7 +20,7 @@ class WeatherAPIAsync:
             "longitude": lon,
             "current": "temperature_2m,wind_speed_10m",
         }
-        response = await client.post(data=request_data)
+        response = await client.post(self.api_url , data=request_data)
         weather_data = BaseWeatherSchema(**response.json()["current"])
         return weather_data
 
