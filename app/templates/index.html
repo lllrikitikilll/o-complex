@@ -1,0 +1,29 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз Погоды</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "cities": "/static/cities.js",
+                "weather-api": "/static/weather-api.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Прогноз Погоды</h1>
+        <div class="search-container">
+            <input type="text" id="city-input" placeholder="Введите город...">
+            <div id="suggestions-container"></div>
+        </div>
+        <div id="weather-display">
+            <p>Введите название города, чтобы увидеть прогноз погоды.</p>
+        </div>
+    </div>
+    <script src="/static/script.js" type="module"></script>
+</body>
+</html>
