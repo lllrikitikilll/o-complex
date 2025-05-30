@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from app.api.dependencies import get_async_http_client, get_session_id
 from app.api.schemas import RequestSchema
 from app.api.weatherapi import weather_api
-from app.dao.db_methods import add_search_log
+from app.dao.db_methods import add_search_log, get_history
 
 router = APIRouter(prefix="", tags=["API"])
 templates = Jinja2Templates(directory="app/templates")
@@ -15,6 +15,12 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/")
 async def get_main_page(request: Request):
     return templates.TemplateResponse(name="index.html", context={"request": request})
+
+
+@router.post("/history")
+async def get_main_page():
+    return await get_history()
+
 
 
 @router.post("/weather")

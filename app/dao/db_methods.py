@@ -7,13 +7,18 @@ from app.dao.models import Sessionlog
 
 @connection
 async def get_history(session: AsyncSession) -> None:
-    records = session.query(
-        (Sessionlog.search_request, func.count(Sessionlog.id).label("count"))
+    query = (
+        select(
+            Sessionlog.search_request,
+            func.count(Sessionlog.id).label("count")
+        )
         .group_by(Sessionlog.search_request)
         .order_by(Sessionlog.search_request)
-        .all()
     )
-    return records
+
+    records = await session.execute(query)
+    result_dict = {search_request: count for search_request, count in records.all()}
+    return result_dict
 
 
 @connection
