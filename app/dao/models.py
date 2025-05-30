@@ -7,5 +7,6 @@ class Sessionlog(Base):
     __tablename__ = "session_log"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(String)
     search_request: Mapped[str] = mapped_column(String)
     
