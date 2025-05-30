@@ -31,3 +31,8 @@ docker-compose exec app_container poetry run alembic upgrade head
 GET `/` - возвращает статические файлы *.js, *.css, *.html 
 POST `/api/weather` - api для взаимодействия фронтенда и бекенда, отвечает данными по городу
 POST `/api/history` - api возвращает города и количество запросов по ним
+
+документация доступна по url
+```bash
+http://127.0.0.1:8000/docs
+```
