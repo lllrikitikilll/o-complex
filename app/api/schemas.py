@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class RequestSchema(BaseModel):
     lat: str
     lon: str
+    city: str
 
 
 class BaseWeatherSchema(BaseModel):
