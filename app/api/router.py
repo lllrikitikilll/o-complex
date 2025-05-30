@@ -13,19 +13,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/")
 async def get_main_page(request: Request):
-    return templates.TemplateResponse(
-        name="index.html", context={"request": request}
-    )
+    return templates.TemplateResponse(name="index.html", context={"request": request})
 
 
 @router.post("/weather")
-async def get_weather_on_city(coords: RequestSchema):
-    async with AsyncClient() as client:
-        weather = await weather_api.get_basic_weather(
-            client, coords.lat, coords.lon
-        )
+async def get_weather_on_city(
+    coords: RequestSchema, client: AsyncClient=Depends(get_async_http_client)
+    ):
+    weather = await weather_api.get_basic_weather(client, coords.lat, coords.lon)
     return JSONResponse(
-        {
-            "temperature": weather.temperature_2m,
-            "windSpeed": weather.wind_speed_10m}
+        {"temperature": weather.temperature_2m, "windSpeed": weather.wind_speed_10m}
     )
