@@ -7,11 +7,10 @@ const weatherDisplay = document.getElementById('weather-display');
 cityInput.addEventListener('input', autocomplete);
 cityInput.addEventListener('focus', () => {
     if (cityInput.value.trim().length > 0) {
-        autocomplete(); // Показать предложения, если есть текст
+        autocomplete();
     }
 });
 
-// Скрыть предложения при клике вне
 document.addEventListener('click', (event) => {
     if (!cityInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
         suggestionsContainer.innerHTML = '';
@@ -46,8 +45,7 @@ function displaySuggestions(cities) {
             city.name,
             city.coords.lat,
             city.coords.lon,
-        )
-    );
+        ));
 
         suggestionsContainer.appendChild(suggestionItem);
     });
@@ -58,18 +56,20 @@ async function selectCity(cityName, lat, lon) {
     cityInput.value = cityName;
     suggestionsContainer.innerHTML = '';
     suggestionsContainer.style.display = 'none';
-    cityInput.blur(); // Убираем фокус с поля ввода
+    cityInput.blur();
+
+    document.cookie = `last_search=${encodeURIComponent(cityName)}; path=/`;
 
     weatherDisplay.innerHTML = '<p>Загрузка данных о погоде...</p>';
 
     try {
-        let coords = {"lat": lat, "lon": lon}
+        let coords = {"lat": lat, "lon": lon, "city": cityName}
         const response = await fetch(
-            `/weather` , { 
+            `/weather`, { 
                 method: "POST",
                 headers: {
-                        'Content-Type': 'application/json;charset=utf-8'
-                    },
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
                 body: JSON.stringify(coords) 
             }
         );
@@ -77,12 +77,30 @@ async function selectCity(cityName, lat, lon) {
             throw new Error('Сетевая ошибка');
         }
         const data = await response.json();
-        data.city = cityName
+        data.city = cityName;
         displayWeather(data);
     } catch (error) {
         console.error("Ошибка получения погоды:", error);
         weatherDisplay.innerHTML = `<p>Не удалось загрузить данные о погоде для города ${cityName}. Попробуйте еще раз.</p>`;
     }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    displayLastSearch();
+});
+
+function displayLastSearch() {
+    const lastSearch = getCookie('last_search');
+    if (lastSearch) {
+        cityInput.value = decodeURIComponent(lastSearch);
+        autocomplete();
+    }
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 function displayWeather(data) {
