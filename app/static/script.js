@@ -11,6 +11,10 @@ cityInput.addEventListener('focus', () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    displayLastSearch();
+});
+
 document.addEventListener('click', (event) => {
     if (!cityInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
         suggestionsContainer.innerHTML = '';
@@ -65,7 +69,7 @@ async function selectCity(cityName, lat, lon) {
     try {
         let coords = {"lat": lat, "lon": lon, "city": cityName}
         const response = await fetch(
-            `/weather`, { 
+            `/api/weather`, { 
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -85,17 +89,18 @@ async function selectCity(cityName, lat, lon) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    displayLastSearch();
-});
-
 function displayLastSearch() {
     const lastSearch = getCookie('last_search');
     if (lastSearch) {
-        cityInput.value = decodeURIComponent(lastSearch);
+        const cityName = decodeURIComponent(lastSearch);
+        cityInput.value = cityName;
+        const city = CITIES.find(city => city.name === cityName);
+        selectCity(city.name, city.coords.lat, city.coords.lon);
+    } else {
         autocomplete();
     }
 }
+
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
