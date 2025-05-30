@@ -1,6 +1,7 @@
-from app.dao.database import Base
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Integer
+
+from app.dao.database import Base
 
 
 class Sessionlog(Base):
