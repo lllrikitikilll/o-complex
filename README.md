@@ -18,13 +18,13 @@
 ### Запуск
 Запуск контейнеров
  ```bash
- docker compose -f 'docker-compose.yml' up -d --build
+ docker-compose -f 'docker-compose.yml' up -d --build
  ```
 
 Создание таблиц через алембик, первая миграция
 ```bash
-docker-compose exec app_container poetry run alembic revision --autogenerate -m "Initial revision"
-docker-compose exec app_container poetry run alembic upgrade head
+docker exec app_container poetry run alembic revision --autogenerate -m "Initial revision"
+docker exec app_container poetry run alembic upgrade head
 ```
 
 ### Роуты
